@@ -1,16 +1,26 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import DeleteIcon from '@mui/icons-material/Delete';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
 import ModeEditOutlineIcon from '@mui/icons-material/ModeEditOutline';
-import { Box, Button, Divider, Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, ToggleButton, ToggleButtonGroup } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
+import { Table, TableBody, TableCell, TableRow, ToggleButton } from '@mui/material';
 import AddTask from './AddTask';
 import { useNavigate } from 'react-router-dom';
 import CheckIcon from '@mui/icons-material/Check';
 import RestoreIcon from '@mui/icons-material/Restore';
 import CryptoJS from 'crypto-js';
-
+import {
+    StyledContainer,
+    HeaderSection,
+    PageTitle,
+    StyledTableContainer,
+    StyledTableHead,
+    StyledTableRow,
+    ActionIconWrapper,
+    StyledToggleButtonGroup,
+    AddButton,
+    EmptyStateMessage
+} from '../styles/HomeStyles';
 
 interface Forecast {
     id: string;
@@ -18,8 +28,8 @@ interface Forecast {
     description: string;
     isCompleted: string;
 }
-function Home() {
 
+function Home() {
     const [forecasts, setForecasts] = useState<Forecast[]>() || [];
     const [open, setOpen] = useState(false);
     const [alignment, setAlignment] = useState('Existing');
@@ -29,9 +39,9 @@ function Home() {
     };
     const navigate = useNavigate();
     const populateWeatherData = async () => {
-        const response = await axios.get(`https://localhost:7171/api/Task`);
+        const response = await axios.get(`https://localhost:7011/api/Task/GetAllTask`);
         console.log("response", response);
-        setForecasts(response.data.data);
+        setForecasts(response.data);
     };
 
     const SECRET_KEY = "your-secret-key-123";
@@ -47,17 +57,22 @@ function Home() {
         }
     }
     const GetAllDeleted = async () => {
-        const response = await axios.get(`https://localhost:7171/api/Task/GetAllDeleted`);
+        const response = await axios.get(`https://localhost:7011/api/Task/GetAllDeleted`);
         console.log("response", response);
-        setForecasts(response.data.data);
+        setForecasts(response.data);
     };
     const handeldeleteclick = (id: string) => {
         deleteTask(id);
     }
     const deleteTask = async (id: string) => {
-        const response = await axios.delete(`https://localhost:7171/api/Task/${id}`, { data: { flag: true } });
+        if(alignment === 'Existing'){
+        const response = await axios.delete(`https://localhost:7011/api/Task/DeleteTask/${id}`);
         console.log("response", response);
-        populateWeatherData();
+        populateWeatherData();}
+        else{
+            const response = await axios.delete(`https://localhost:7011/api/Task/DeletePamenetly/${id}`);
+            GetAllDeleted();
+        }
     };
     useEffect(() => {
         if (alignment === 'Existing') {
@@ -76,10 +91,10 @@ function Home() {
     const getById = async (id: string) => {
         try {
             console.log("Fetching task with ID:", id);
-            const response = await axios.get(`https://localhost:7171/api/Task/${id}`);
+            const response = await axios.get(`https://localhost:7011/api/Task/GetById/${id}`);
 
-            if (response.data.data) {
-                localStorage.setItem("task", JSON.stringify(response.data.data));
+            if (response.data) {
+                localStorage.setItem("task", JSON.stringify(response.data));
 
                 navigate(`/UpdateTask/${id}`);
             } else {
@@ -94,7 +109,7 @@ function Home() {
         completeTask(id);
     }
     const completeTask = async (id: string) => {
-        const response = await axios.patch(`https://localhost:7171/api/Task/${id}`, { isCompleted: true });
+        const response = await axios.patch(`https://localhost:7011/api/Task/CompleteTask/${id}`);
         console.log("response", response);
         populateWeatherData();
     };
@@ -103,7 +118,7 @@ function Home() {
         restoreTask(id);
     }
     const restoreTask = async (id: string) => {
-        const response = await axios.patch(`https://localhost:7171/api/Task/restore/${id}`, { flag: false });
+        const response = await axios.patch(`https://localhost:7011/api/Task/RestoreTask/${id}`);
         console.log("response", response);
         GetAllDeleted()
     };
@@ -116,63 +131,98 @@ function Home() {
     };
 
     return (
-        <div>
-            <div style={{display:'flex',justifyContent:'space-between'}}>
-                <ToggleButtonGroup
+        <StyledContainer>
+            <HeaderSection>
+                <PageTitle variant="h4">
+                    Task Management
+                </PageTitle>
+            </HeaderSection>
+            
+            <HeaderSection>
+                <StyledToggleButtonGroup
                     color="primary"
                     value={alignment}
                     exclusive
                     onChange={handleChange}
                     aria-label="Platform"
                 >
-                    <ToggleButton value="Existing">Existing</ToggleButton>
-                    <ToggleButton value="Deleted">Deleted</ToggleButton>
-                </ToggleButtonGroup>
-                <Button variant="contained" onClick={handleNavigate}>Add Task</Button>
-            </div>
-            <TableContainer >
-                <Table className="table table-striped" aria-labelledby="tableLabel">
-                    <TableHead >
-                        <TableRow className='table-header'>
+                    <ToggleButton value="Existing">Existing Tasks</ToggleButton>
+                    <ToggleButton value="Deleted">Deleted Tasks</ToggleButton>
+                </StyledToggleButtonGroup>
+                <AddButton 
+                    variant="contained" 
+                    onClick={handleNavigate}
+                    startIcon={<AddIcon />}
+                >
+                    Add New Task
+                </AddButton>
+            </HeaderSection>
+
+            <StyledTableContainer>
+                <Table aria-labelledby="tableLabel">
+                    <StyledTableHead>
+                        <TableRow>
                             <TableCell>Title</TableCell>
                             <TableCell>Description</TableCell>
-                            <TableCell>{alignment === 'Existing' ? "Deleted" : "Restore"}</TableCell>
-
-                            {
-                                alignment === 'Existing' &&
+                            <TableCell align="center">Delete</TableCell>
+                            {alignment === 'Deleted' && (
+                                <TableCell align="center">Restore</TableCell>
+                            )}
+                            {alignment === 'Existing' && (
                                 <>
-                                    <TableCell>Edit</TableCell>
-                                    <TableCell>Complete</TableCell>
+                                    <TableCell align="center">Update</TableCell>
+                                    <TableCell align="center">Complete</TableCell>
                                 </>
-                            }
+                            )}
                         </TableRow>
-                    </TableHead >
-                    <TableBody >
-
-                        {forecasts && forecasts.map(item =>
-                            <TableRow key={item.id}>
+                    </StyledTableHead>
+                    <TableBody>
+                        {forecasts && forecasts.map(item => (
+                            <StyledTableRow key={item.id}>
                                 <TableCell>{item.title}</TableCell>
                                 <TableCell>{item.description}</TableCell>
-                                <TableCell>{alignment === 'Existing' ? <DeleteIcon onClick={() => handeldeleteclick(item.id)} /> : <RestoreIcon onClick={() => handelrestoreclick(item.id)} />} </TableCell>
-                                {alignment === 'Existing' &&
+                                <TableCell align="center">
+                                    <ActionIconWrapper>
+                                        <DeleteIcon color="error" onClick={() => handeldeleteclick(item.id)} />
+                                    </ActionIconWrapper>
+                                </TableCell>
+                                {alignment === 'Deleted' && (
+                                    <TableCell align="center">
+                                        <ActionIconWrapper>
+                                            <RestoreIcon color="primary" onClick={() => handelrestoreclick(item.id)} />
+                                        </ActionIconWrapper>
+                                    </TableCell>
+                                )}
+                                {alignment === 'Existing' && (
                                     <>
-                                        <TableCell><ModeEditOutlineIcon onClick={() => handelupdateclick(item.id)} /></TableCell>
-                                        <TableCell><CheckIcon onClick={() => handelcompleteclick(item.id)} /></TableCell>
+                                        <TableCell align="center">
+                                            <ActionIconWrapper>
+                                                <ModeEditOutlineIcon color="primary" onClick={() => handelupdateclick(item.id)} />
+                                            </ActionIconWrapper>
+                                        </TableCell>
+                                        <TableCell align="center">
+                                            <ActionIconWrapper>
+                                                <CheckIcon color="success" onClick={() => handelcompleteclick(item.id)} />
+                                            </ActionIconWrapper>
+                                        </TableCell>
                                     </>
-                                }
-
-                            </TableRow >
+                                )}
+                            </StyledTableRow>
+                        ))}
+                        {(!forecasts || forecasts.length === 0) && (
+                            <TableRow>
+                                <TableCell colSpan={alignment === 'Existing' ? 5 : 3} align="center">
+                                    <EmptyStateMessage>
+                                        No tasks found
+                                    </EmptyStateMessage>
+                                </TableCell>
+                            </TableRow>
                         )}
-                    </TableBody >
-                </Table >
-            </TableContainer>
-            <div>
-
-
-
-            </div>
-        </div>
-    )
+                    </TableBody>
+                </Table>
+            </StyledTableContainer>
+        </StyledContainer>
+    );
 }
 
-export default Home
+export default Home;

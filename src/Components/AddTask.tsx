@@ -74,7 +74,7 @@ function AddTask() {
 
     const addTask = async (payload: TaskState & { isCompleted: boolean }) => {
         try {
-            const response = await axios.post("https://localhost:7171/api/Task", payload);
+            const response = await axios.post("https://localhost:7011/api/Task/AddTask", payload);
             console.log("data", response);
             if (response.data.error) {
                 setExeption(response.data.error);
@@ -84,9 +84,10 @@ function AddTask() {
                 navigate('/home');
             }
         } catch (error: any) {
+            console.log("error", error);
             if (error.response?.data) {
-                console.log("error", error.response.data.error);
-                setExeption(error.response.data.error);
+                console.log("error", error.response.data);
+                setExeption(error.response.data);
             } else {
                 console.error("Error adding task:", error);
             }
@@ -94,7 +95,7 @@ function AddTask() {
     }
 
     return (
-        <Box style={{}}>
+        <Box style={{border:"1px  solidrgb(119, 112, 112)",padding:"10px"}}>
             <h3>Add Task</h3>
            <TextField 
             fullWidth 

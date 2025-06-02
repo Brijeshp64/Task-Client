@@ -77,7 +77,7 @@ function UpdateTask() {
     }
 
     const updateTask = async (payload: any) => {
-        const response = await axios.put(`https://localhost:7171/api/Task/${task.id}`, payload);
+        const response = await axios.put(`https://localhost:7171/api/Task/UpdateTask/${task.id}`, payload);
         console.log("data", response)
         if (response.status === 200) {
             navigate('/home');

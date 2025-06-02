@@ -10,6 +10,7 @@ import MailIcon from '@mui/icons-material/Mail';
 import { Box, Divider, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from '@mui/material';
 import AddTask from './Components/AddTask';
 import UpdateTask from './Components/UpdateTask';
+import Register from './Components/Register';
 interface Forecast {
     id: string;
     title: string;
@@ -29,6 +30,7 @@ function App() {
                 <Route path="/home" element={< Home/>} />
                 <Route path="/addTask" element={< AddTask/>} />
                 <Route path="/UpdateTask/:id" element={< UpdateTask/>} />
+                <Route path="/register" element={< Register/>} />
               </Routes>
              </BrowserRouter>
         </div>
