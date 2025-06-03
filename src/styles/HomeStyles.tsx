@@ -1,5 +1,5 @@
-import { styled, alpha } from '@mui/material/styles';
-import { Box, Button, Container, Typography, TableContainer, TableHead, TableRow, ToggleButtonGroup } from '@mui/material';
+import { styled, alpha, keyframes } from '@mui/material/styles';
+import { Box, Button, Container, Typography, TableContainer, TableHead, TableRow, ToggleButtonGroup, CircularProgress } from '@mui/material';
 
 export const StyledContainer = styled(Container)(({ theme }) => ({
     padding: theme.spacing(4),
@@ -111,4 +111,36 @@ export const EmptyStateMessage = styled(Typography)(({ theme }) => ({
     color: theme.palette.text.secondary,
     fontSize: '1.1rem',
     fontStyle: 'italic',
+}));
+
+export const LoadingOverlay = styled(Box)(({ theme }) => ({
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    zIndex: 9999,
+    backdropFilter: 'blur(4px)',
+}));
+
+export const LoaderWrapper = styled(Box)(({ theme }) => ({
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: theme.spacing(2),
+}));
+
+export const LoadingText = styled(Typography)(({ theme }) => ({
+    color: theme.palette.common.white,
+    fontSize: '1.1rem',
+    fontWeight: 500,
+    marginTop: theme.spacing(2),
+}));
+
+export const StyledCircularProgress = styled(CircularProgress)(({ theme }) => ({
+    color: theme.palette.common.white,
 })); 
